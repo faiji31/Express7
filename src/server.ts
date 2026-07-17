@@ -46,7 +46,7 @@ app.get('/', (req:Request, res:Response) => {
   })
 })
 
-app.post("/users",async(req:Request,res:Response)=>{
+app.post("/api/users",async(req:Request,res:Response)=>{
     const {name,email,password,age} = req.body
 
     try {
@@ -55,6 +55,7 @@ app.post("/users",async(req:Request,res:Response)=>{
       RETURNING *`
     ,[name,email,password,age])
     res.status(201).json({
+      success:true,
         message:"User Created Successfully!!!",
         data:result.rows[0]
     })
@@ -66,6 +67,105 @@ app.post("/users",async(req:Request,res:Response)=>{
       })
     }
 
+})
+
+app.get("/api/users",async(req:Request,res:Response)=>{
+  try {
+    const result = await pool.query(`
+      SELECT * FROM users
+      `)
+      res.status(201).json({
+        success:true,
+        message:"user retrived successfully!",
+        data:result.rows
+
+      })
+    
+  } catch (error:any) {
+    res.status(500).json({
+      message:error.message,
+      error:error
+    })
+    
+  }
+})
+
+app.get("/api/users/:id",async(req:Request,res:Response)=>{
+  const {id} = req.params
+  try {
+    const result = await pool.query(`
+      SELECT * FROM users WHERE id = $1
+      
+      `,[id])
+
+       if(result.rows.length === 0 ){
+         res.status(404).json({
+        success:false,
+        message:"user is not found!",
+        data:{}
+
+      })
+        
+
+      }
+      res.status(201).json({
+        success:true,
+        message:"user retrived successfully!",
+        data:result.rows[0]
+
+      })
+     
+    
+  } catch (error:any) {
+    res.status(500).json({
+      message:error.message,
+      error:error
+    })
+    
+  }
+    
+  }
+)
+
+app.put("/api/users/:id",async(req:Request,res:Response)=>{
+       const {id} = req.params;
+       const {name,password,age,is_active} = req.body;
+      try {
+         const result =await pool.query(`
+        UPDATE users SET name=$1,password=$2,age=$3,is_active=$4
+        WHERE id =$5 RETURNING *
+        
+        `,[name,password,age,is_active,id])
+
+        if(result.rows.length === 0 ){
+         res.status(404).json({
+        success:false,
+        message:"user is not found!",
+        data:{}
+
+      })
+        
+
+      }
+
+        
+
+
+         res.status(201).json({
+        success:true,
+        message:"user Update successfully!",
+        data:result.rows[0]
+
+      })
+        
+      } catch (error:any) {
+         res.status(500).json({
+      message:error.message,
+      error:error
+    })
+        
+        
+      }
 })
 
 app.listen(port, () => {
