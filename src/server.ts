@@ -6,11 +6,11 @@ import express, {
 } from "express";
 const app: Application = express();
 import { Pool } from "pg";
-const port = 3000;
+import config from "./config";
+const port = config.port
 
 const pool = new Pool({
-  connectionString:
-    "postgresql://neondb_owner:npg_sgyv0G1RMSxI@ep-proud-cake-atqt79g7-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+  connectionString:config.connection_string
 });
 
 const initDB = async () => {
